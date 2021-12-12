@@ -248,36 +248,39 @@ def EditTab():
 
 #================================================================================
     def Edit():
-
+        check = messagebox.askyesno('Conferm?','คุณต้องการแก้ใขข้อมูลใช่หรือไม่?')
         # print(transitionid)
         # print(alltransition)
-        olddata = alltransition[str(transitionid)]
-        print('ข้อมูลชุดเก่า :',olddata)
-        V1 = E_Month
-        V2 = int(E_Before.get()) 
-        V3 = int(E_After.get())
-        V4 = V2 - V3
-        
-        if V4<=150:
-            Ea = V4*3.2484   
+        if check == True:
+            olddata = alltransition[str(transitionid)]
+            print('ข้อมูลชุดเก่า :',olddata)
+            V1 = E_Month.get()
+            V2 = int(E_Before.get()) 
+            V3 = int(E_After.get())
+            V4 = V2 - V3
             
-        elif V4<=250:
-            Ea = (150*3.2484) + (V4-150)*4.2218
+            if V4<=150:
+                Ea = V4*3.2484   
+                
+            elif V4<=250:
+                Ea = (150*3.2484) + (V4-150)*4.2218
 
-        elif V4>=400:
-            Ea = (150*3.2484) + (250*4.2218) + (V4-400)*4.4217
+            elif V4>=400:
+                Ea = (150*3.2484) + (250*4.2218) + (V4-400)*4.4217
 
-        Service = 38.22
-        FT = V4*(-0.1532)
-        Vat = (Ea + FT+ Service)*0.07
-        # total = Ea + FT + Service
-        result = Ea + FT + Vat+ Service 
+            Service = 38.22
+            FT = V4*(-0.1532)
+            Vat = (Ea + FT+ Service)*0.07
+            # total = Ea + FT + Service
+            result = Ea + FT + Vat+ Service 
 
-        newdata = [olddata[0],olddata[1],V1,V2,V3,V4,"{:.2f}".format(result)]
-        alltransition[str(transitionid)] = newdata
+            newdata = [olddata[0],olddata[1],V1,V2,V3,V4,"{:.2f}".format(result)]
+            alltransition[str(transitionid)] = newdata
 
-        UpdateCSV()
-        Updatetable()
+            UpdateCSV()
+            Updatetable()
+        else:
+            print('ERROR')
 
     L = ttk.Label(POPUP,text='หน่วยไฟล่าสุด',font=FONT2)
     L.pack()
@@ -308,13 +311,16 @@ def EditTab():
     data = Etable.item(select)
     data = data['values']
     print(data)
-    transitionid = data[0]
+    try:   
+        transitionid = data[0]
 
-    E_Before.set(data[3])
-    E_After.set(data[4])
-    E_Month.set(data[2])
-    
-    
+        E_Before.set(data[3])
+        E_After.set(data[4])
+        E_Month.set(data[2])
+    except:
+        #print('ERROR')
+        messagebox.showwarning('คำเตือน','คุณไม่ได้เลือกรายการ!!')
+        POPUP.destroy()
     POPUP.mainloop()
 
 FONT3 = (None,9)
