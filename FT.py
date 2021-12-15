@@ -73,13 +73,13 @@ def tick():
  
 
 lb_clock = ttk.Label(T1,font='times 11',background='#afe8a7')
-lb_clock.place(x=390,y=20)
+lb_clock.place(x=550,y=20)
 
 tick()
 
 M_img = PhotoImage(file='FT.png').subsample(3)
 BG1 = ttk.Label(T1,image=M_img,background='#afe8a7')
-BG1.place(x=220,y=40)
+BG1.place(x=290,y=40)
 #------------------------------------------------------------------------------------------
 
 def Save(evevt=None):
@@ -144,19 +144,19 @@ def Save(evevt=None):
 #============================================================================
 
 L = ttk.Label(T1,text='หน่วยไฟล่าสุด',font=FONT2,background='#afe8a7')
-L.place(x=150,y=220)
+L.place(x=220,y=220)
 E_Before = StringVar()
 E1 = ttk.Entry(T1,textvariable=E_Before,font=FONT2)
-E1.place(x=110,y=260) 
+E1.place(x=180,y=260) 
 
 L = ttk.Label(T1,text='หน่วยไฟเดือนที่แล้ว',font=FONT2,background='#afe8a7')
-L.place(x=340,y=220)
+L.place(x=420,y=220)
 E_After = StringVar()
 E2 = ttk.Entry(T1,textvariable=E_After,font=FONT2)
-E2.place(x=320,y=260)
+E2.place(x=400,y=260)
 
 L = ttk.Label(T1,text='เลือกเดือนที่บันทึก',font=FONT2,background='#afe8a7')
-L.place(x=180,y=320)
+L.place(x=240,y=320)
 # E_Before = StringVar()
 # E1 = ttk.Entry(T1,textvariable=E_Before,font=FONT2)
 # E1.place(x=270,y=270)
@@ -165,11 +165,11 @@ T1.option_add('*font','consolas 16')
 E3 = ttk.Combobox(T1,textvariable=E_Month,value=["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
 "พฤษภาคม ", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
 "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"])
-E3.place(x=335,y=320,width=160)
+E3.place(x=400,y=320,width=160)
 
 B_img = PhotoImage(file='save.png')
 B1 = ttk.Button(T1,text='    บันทึกที่นี่',image=B_img,compound='left',command=Save)
-B1.place(x=230,y=380,width=150)
+B1.place(x=300,y=380,width=150)
 
 ###################################### TAP 2  ############################################
 L = ttk.Label(T2,text='ใบแจ้งค่าไฟฟ้า',font=FONT2).pack(pady=20)
@@ -189,7 +189,7 @@ def read_csv():
     return data
   
 header = ['รหัส','วันที่','เดือน','ล่าสุด','ก่อน','จำนวนหน่วย','ค่าไฟสุทธิ(บาท)']
-headerwidht = [130,160,80,80,80,80,80]
+headerwidht = [150,160,80,80,80,80,80]
 
 L = ttk.Label(T3,text='ตารางแสดงผลบันทึก',font=FONT2).pack(pady=20)
 Etable = ttk.Treeview(T3,columns=header,show='headings',height=15)
@@ -217,25 +217,28 @@ def Delete(event=None):
         try:
             transitionid = data[0]
             del alltransition[str(transitionid)]
+            #print('หาค่าที่ต้องการ',alltransition[str(transitionid)])
 
             UpdateCSV()
             Updatetable()
         except:
-            #print('ไม่ได้เลือก')
             messagebox.showwarning('คำเตือน','คุณไม่ได้เลือกรายการ!!')
     else:
         pass
 
 Dbutton = ttk.Button(T3,text='Delete',command=Delete)
-Dbutton.place(x=500,y=50)   
+Dbutton.place(x=650,y=40)   
 Etable.bind('<Delete>',Delete)
 
 def Updatetable():
     Etable.delete(*Etable.get_children())
     try:
         data = read_csv()
+
         for d in data:
             alltransition[d[0]] = d
+            print('up',d)
+            #star = d[1],d[2],d[3],d[4],d[5],d[6]
             Etable.insert('',0,values=d)
     except:
         print('No data')
@@ -247,10 +250,10 @@ def EditTab():
     POPUP.title('เมนูแก้ไข')
 
 #================================================================================
+
     def Edit():
         check = messagebox.askyesno('Conferm?','คุณต้องการแก้ใขข้อมูลใช่หรือไม่?')
-        # print(transitionid)
-        # print(alltransition)
+        
         if check == True:
             olddata = alltransition[str(transitionid)]
             print('ข้อมูลชุดเก่า :',olddata)
@@ -310,7 +313,7 @@ def EditTab():
     select = Etable.selection()
     data = Etable.item(select)
     data = data['values']
-    print(data)
+    #print(data)
     try:   
         transitionid = data[0]
 
@@ -320,7 +323,7 @@ def EditTab():
     except:
         #print('ERROR')
         messagebox.showwarning('คำเตือน','คุณไม่ได้เลือกรายการ!!')
-        POPUP.destroy()
+
     POPUP.mainloop()
 
 FONT3 = (None,9)
