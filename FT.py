@@ -2,10 +2,46 @@ from tkinter import *
 from tkinter import ttk,messagebox
 import csv
 from datetime import datetime
+import sqlite3
 
+#================================== DATABASE =======================================================
+conn = sqlite3.connect('FTresult.db')
+c = conn.cursor()
+
+c.execute("""CREATE TABLE IF NOT EXISTS FTpayment(
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                transictionid TEXT,
+                time TEXT,
+                Month TEXT,
+                Before INTEGER,
+                After INTEGER,
+                unit INTEGER,
+                result REAL   
+            )""")
+
+def insert_FT(transictionid,time,Month,Before,After,unit,result):
+    ID = None
+    with conn:
+        c.execute("""INSERT INTO FTpayment VALUES (?,?,?,?,?,?,?,?)""",
+        (ID,transictionid,time,Month,Before,After,unit,"{:.2f}".format(result)))
+    conn.commit()
+
+#=================================================================================================
 
 GUI = Tk()
-GUI.geometry('750x500')
+
+w = 750
+h = 500
+
+ws = GUI.winfo_screenwidth() # ขนาดหน้าจอกว้าง
+hs = GUI.winfo_screenheight() # ขนาดหน้าจอสูง
+
+x = (ws/2) - (w/2)
+y = (hs/2) - (h/2)
+
+GUI.geometry(f'{w}x{h}+{x:.0f}+{y:.0f}')
+
+
 GUI.title('โปรแกรมคำนวนค่าไฟฟ้า V1.0')
  
 ######################## MenuBar ###############################
@@ -112,6 +148,9 @@ def Save(evevt=None):
         transictionid = stam.now().strftime("%Y%m%d%H%M%f")
         time = days[today] + '-'+ time 
 
+        insert_FT(transictionid,time,Month,int(Before),int(After),unit,float("{:.2f}".format(result)))
+        
+
         Mtext = '        ***----  บันทึกเดือน : {}  ----***'.format(Month)
         text0 = '\nจำนวนไฟฟ้า(:หน่วย) ----------- *   {:.2f} หน่วย'.format(unit)
         text1 = '\nค่าพลังงานไฟฟ้า -------- *   {:.2f} หน่วย'.format(Ea)
@@ -124,7 +163,7 @@ def Save(evevt=None):
         text = Mtext + text0 + text1 + text2 + text3 + text4 + text5 + text6
         
         V_result.set(text)
-        
+
         with open ('savecsv.csv','a',newline='',encoding='utf-8') as f:
             wy = csv.writer(f)
             data = [transictionid,time,Month,Before,After,unit,"{:.2f}".format(result)]
@@ -133,14 +172,14 @@ def Save(evevt=None):
     except:
         print('No data')
         messagebox.showwarning('ERROR','กรุณากรอกข้อมูลทุกช่อง')
-    E_Before.set('')
-    E_After.set('')
-    E_Month.set('')
+        E_Before.set('')
+        E_After.set('')
+        E_Month.set('')
 
     Updatetable()
-
+    
     E1.focus()
-    GUI.bind('<Return>',Save)
+GUI.bind('<Return>',Save)
 #============================================================================
 
 L = ttk.Label(T1,text='หน่วยไฟล่าสุด',font=FONT2,background='#afe8a7')
@@ -246,7 +285,18 @@ def Updatetable():
 
 def EditTab():
     POPUP = Toplevel()
-    POPUP.geometry('300x320')
+
+    w = 300
+    h = 320
+
+    ws = POPUP.winfo_screenwidth() # ขนาดหน้าจอกว้าง
+    hs = POPUP.winfo_screenheight() # ขนาดหน้าจอสูง
+
+    x = (ws/2) - (w/2)
+    y = (hs/2) - (h/2)
+
+    POPUP.geometry(f'{w}x{h}+{x:.0f}+{y:.0f}')
+
     POPUP.title('เมนูแก้ไข')
 
 #================================================================================
