@@ -26,12 +26,37 @@ def insert_FT(transictionid,time,Month,Before,After,unit,result):
         (ID,transictionid,time,Month,Before,After,unit,"{:.2f}".format(result)))
     conn.commit()
 
+def Show_FT():
+    with conn:
+        c.execute("SELECT * FROM FTpayment")
+        Ft = c.fetchall()
+        #print(Ft)
+
+    return Ft
+
+def Update_FT(transictionid,Month,Before,After,unit,result):
+    with conn:
+        c.execute("""UPDATE FTpayment SET Month=?, 
+            Before=?, 
+            After=?, 
+            unit=?, 
+            result=? 
+            WHERE transictionid=(?)""",
+            ([Month,Before,After,unit,result,transictionid]))
+    conn.commit()
+
+
+def Delete_FT(transictionid):
+    with conn:
+        c.execute("DELETE FROM FTpayment WHERE transictionid=?",([transictionid]))
+    conn.commit()
+
 #=================================================================================================
 
 GUI = Tk()
 
 w = 750
-h = 500
+h = 530
 
 ws = GUI.winfo_screenwidth() # ขนาดหน้าจอกว้าง
 hs = GUI.winfo_screenheight() # ขนาดหน้าจอสูง
@@ -69,8 +94,9 @@ filemenu.add_command(label='About',command=About)
 
 ###########################################################################################
 
-# Icon1 = PhotoImage(file='running.png')
-# Icon2 = PhotoImage(file='notes.png')
+Icon1 = PhotoImage(file='note.png')
+Icon2 = PhotoImage(file='list.png',)
+Icon3 = PhotoImage(file='table.png')
 
 Tap = ttk.Notebook(GUI)
 T1 = Frame(Tap,background='#afe8a7')
@@ -78,9 +104,9 @@ T2 = Frame(Tap)
 T3 = Frame(Tap)
 Tap.pack(fill=BOTH, expand=1)
 
-Tap.add(T1, text=f'{"ลงบันทึก": ^20s}')#,image=Icon1,compound='top')
-Tap.add(T2, text=f'{"แสดงผล": ^20s}')#,image=Icon2,compound='top')
-Tap.add(T3, text=f'{"ตารางแสดงผล": ^20s}')
+Tap.add(T1, text=f'{"ลงบันทึก": ^20s}',image=Icon1,compound='top')
+Tap.add(T2, text=f'{"แสดงผล": ^20s}',image=Icon2,compound='top')
+Tap.add(T3, text=f'{"ตารางแสดงผล": ^20s}',image=Icon3,compound='top')
 
 #################################### *** TAB 1  *** #######################################
 F1 = Frame(T1)
@@ -119,7 +145,6 @@ BG1.place(x=290,y=40)
 #------------------------------------------------------------------------------------------
 
 def Save(evevt=None):
-    print('ทดสอบ')
     Before = E_Before.get()
     After = E_After.get()
     Month = E_Month.get()
@@ -149,7 +174,7 @@ def Save(evevt=None):
         time = days[today] + '-'+ time 
 
         insert_FT(transictionid,time,Month,int(Before),int(After),unit,float("{:.2f}".format(result)))
-        
+
 
         Mtext = '        ***----  บันทึกเดือน : {}  ----***'.format(Month)
         text0 = '\nจำนวนไฟฟ้า(:หน่วย) ----------- *   {:.2f} หน่วย'.format(unit)
@@ -170,7 +195,6 @@ def Save(evevt=None):
             wy.writerow(data)
 
     except:
-        print('No data')
         messagebox.showwarning('ERROR','กรุณากรอกข้อมูลทุกช่อง')
         E_Before.set('')
         E_After.set('')
@@ -245,7 +269,14 @@ def UpdateCSV():
     with open('savecsv.csv','w',newline='',encoding='utf-8') as f:
         fw = csv.writer(f)
         data = list(alltransition.values())
-        fw.writerows(data)    
+        fw.writerows(data)
+
+def UpdateSQL():
+    data = list(alltransition.values())
+    for d in data:
+        Update_FT(d[0],d[2],d[3],d[4],d[5],d[6])
+       
+
    
 def Delete(event=None):
     check = messagebox.askyesno('Conferm?','คุณต้องการลบข้อมูลใช่หรือไม่?')
@@ -256,9 +287,10 @@ def Delete(event=None):
         try:
             transitionid = data[0]
             del alltransition[str(transitionid)]
-            #print('หาค่าที่ต้องการ',alltransition[str(transitionid)])
+        #print('หาค่าที่ต้องการ',alltransition[str(transitionid)])
 
-            UpdateCSV()
+        #UpdateCSV()
+            Delete_FT(str(transitionid))
             Updatetable()
         except:
             messagebox.showwarning('คำเตือน','คุณไม่ได้เลือกรายการ!!')
@@ -272,15 +304,17 @@ Etable.bind('<Delete>',Delete)
 def Updatetable():
     Etable.delete(*Etable.get_children())
     try:
-        data = read_csv()
+        data = Show_FT()
+        #data = read_csv()
+        #print('DATA : ',data)
 
         for d in data:
-            alltransition[d[0]] = d
-            print('up',d)
+            alltransition[d[1]] = d[1:]
+            #print('up',d)
             #star = d[1],d[2],d[3],d[4],d[5],d[6]
-            Etable.insert('',0,values=d)
+            Etable.insert('',0,values=d[1:])
+   
     except:
-        print('No data')
         pass
 
 def EditTab():
@@ -306,7 +340,7 @@ def EditTab():
         
         if check == True:
             olddata = alltransition[str(transitionid)]
-            print('ข้อมูลชุดเก่า :',olddata)
+            #print('ข้อมูลชุดเก่า :',olddata)
             V1 = E_Month.get()
             V2 = int(E_Before.get()) 
             V3 = int(E_After.get())
@@ -330,10 +364,11 @@ def EditTab():
             newdata = [olddata[0],olddata[1],V1,V2,V3,V4,"{:.2f}".format(result)]
             alltransition[str(transitionid)] = newdata
 
-            UpdateCSV()
+            UpdateSQL()
+            #UpdateCSV()
             Updatetable()
         else:
-            print('ERROR')
+            pass
 
     L = ttk.Label(POPUP,text='หน่วยไฟล่าสุด',font=FONT2)
     L.pack()

@@ -25,8 +25,27 @@ def Show_FT():
     with conn:
         c.execute("SELECT * FROM FTpayment")
         Ft = c.fetchall()
-        print(Ft)
+        print('รายละเอียด',Ft)
     return Ft
+
+def Update_FT(transictionid,Month,Before,After,unit,result):
+    with conn:
+        c.execute("UPDATE FTpayment SET Month=?, Before=?, After=?, unit=?, result=? WHERE transictionid=(?)",([Month,Before,After,unit,result,transictionid]))
+    conn.commit()
+
+    print('สำเร็จ')
+
+def Delete_FT(transictionid):
+    with conn:
+        c.execute("DELETE FROM FTpayment WHERE transictionid=?",([transictionid]))
+    conn.commit()   
+
+
+
+
+
+
+
 
 
 
