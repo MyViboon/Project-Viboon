@@ -196,9 +196,9 @@ def Save(evevt=None):
 
     except:
         messagebox.showwarning('ERROR','กรุณากรอกข้อมูลทุกช่อง')
-        E_Before.set('')
-        E_After.set('')
-        E_Month.set('')
+    E_Before.set('')
+    E_After.set('')
+    E_Month.set('')
 
     Updatetable()
     
